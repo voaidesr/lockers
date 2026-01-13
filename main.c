@@ -5,6 +5,7 @@
 #include "vutex.h"
 #include "semavore.h"
 #include "rvlock.h"
+#include "varrier.h"
 
 #define NUM_THREADS 4
 #define ITERATIONS 100000
@@ -108,19 +109,20 @@ void test_rwlock(void) {
     printf("RWLock test %s\n", (rwlock_shared_data == 6) ? "PASSED" : "FAILED");
 }
 
+// Semaphore
 typedef struct {
     int id;
     int is_producer;
 } sem_thread_arg_t;
 
-static int buffer[SEM_BUFFER_SIZE];
-static int buffer_in = 0;
-static int buffer_out = 0;
-static int produced_total = 0;
-static int consumed_total = 0;
-static semavore_t empty_slots;
-static semavore_t full_slots;
-static vutex_t buffer_mutex;
+int buffer[SEM_BUFFER_SIZE];
+int buffer_in = 0;
+int buffer_out = 0;
+int produced_total = 0;
+int consumed_total = 0;
+semavore_t empty_slots;
+semavore_t full_slots;
+vutex_t buffer_mutex;
 
 void *semaphore_thread(void *arg) {
     sem_thread_arg_t *ctx = (sem_thread_arg_t *)arg;
@@ -203,9 +205,45 @@ void test_semaphore(void) {
     printf("Test %s\n", ok ? "PASSED" : "FAILED");
 }
 
+// Barrier
+varrier_t barrier;
+int generation = 0;
+
+void *barrier_thread(void *arg) {
+    int id = *(int *)arg;
+    printf("Thread %d waiting at barrier. %d generations\n", id, generation);
+    bool is_last = varrier_wait(&barrier);
+    if (is_last) {
+        generation++;
+        printf("Thread %d was the last to arrive at barrier. Generation %d completed.\n", id, generation);
+    }
+    printf("Thread %d passed the barrier.\n", id);
+    return NULL;
+}
+
+void test_barrier(void) {
+    printf("\n=== BARRIER TEST ===\n");
+    varrier_init(&barrier, NUM_THREADS);
+
+    pthread_t threads[NUM_THREADS];
+    int ids[NUM_THREADS];
+
+    for (int i = 0; i < NUM_THREADS; i++) {
+        ids[i] = i;
+        pthread_create(&threads[i], NULL, barrier_thread, &ids[i]);
+    }
+
+    for (int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    printf("Barrier test completed\n");
+}
+
 int main(void) {
     test_mutex();
     test_semaphore();
     test_rwlock();
+    test_barrier();
     return 0;
 }

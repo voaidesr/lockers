@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define cpu_pause() do { } while (0)
+#ifndef cpu_pause
+    #define cpu_pause() do { } while (0)
+#endif
 
 typedef struct {
     volatile int locked;
