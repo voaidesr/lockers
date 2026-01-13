@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VUTEX_H
+#define VUTEX_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -7,13 +8,13 @@
 
 typedef struct {
     volatile int locked;
-} sync_mutex_t;
+} vutex_t;
 
-static inline void sync_mutex_init(sync_mutex_t* mutex) {
+static inline void vutex_init(vutex_t* mutex) {
     __atomic_store_n(&mutex->locked, 0, __ATOMIC_RELEASE);
 }
 
-static inline void sync_mutex_lock(sync_mutex_t* mutex) {
+static inline void vutex_lock(vutex_t* mutex) {
     while (1) {
         int expected = 0;
         if (__atomic_compare_exchange_n(&mutex->locked, &expected, 1,
@@ -26,12 +27,14 @@ static inline void sync_mutex_lock(sync_mutex_t* mutex) {
     }
 }
 
-static inline bool sync_mutex_trylock(sync_mutex_t* mutex) {
+static inline bool vutex_trylock(vutex_t* mutex) {
     int expected = 0;
     return __atomic_compare_exchange_n(&mutex->locked, &expected, 1,
                                        false, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED);
 }
 
-static inline void sync_mutex_unlock(sync_mutex_t* mutex) {
+static inline void vutex_unlock(vutex_t* mutex) {
     __atomic_store_n(&mutex->locked, 0, __ATOMIC_RELEASE);
 }
+
+#endif // VUTEX_H
