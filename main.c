@@ -1,20 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include "lockers.h"
+#include "vutex.h"
 
 #define NUM_THREADS 4
 #define ITERATIONS 100000
 
 static int shared_counter = 0;
-static sync_mutex_t mutex;
+static vutex_t mutex;
 
 void *mutex_thread(void *arg) {
     int id = *(int *)arg;
     for (int i = 0; i < ITERATIONS; i++) {
-        sync_mutex_lock(&mutex);
+        vutex_lock(&mutex);
         shared_counter++;
-        sync_mutex_unlock(&mutex);
+        vutex_unlock(&mutex);
     }
     printf("Mutex thread %d completed\n", id);
     return NULL;
@@ -22,7 +22,7 @@ void *mutex_thread(void *arg) {
 
 void test_mutex(void) {
     printf("\n=== MUTEX TEST ===\n");
-    sync_mutex_init(&mutex);
+    vutex_init(&mutex);
     shared_counter = 0;
 
     pthread_t threads[NUM_THREADS];
