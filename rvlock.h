@@ -3,7 +3,9 @@
 
 #define RVLOCK_WRITER_BIT 0x80000000U // 2^31
 
-#define cpu_pause() do { } while (0)
+#ifndef cpu_pause
+    #define cpu_pause() do { } while (0)
+#endif
 
 typedef struct {
     volatile unsigned int state;

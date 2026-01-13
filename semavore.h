@@ -2,7 +2,9 @@
 #ifndef SEMAVORE_H
 #define SEMAVORE_H
 
-#define cpu_pause() do { } while(0)
+#ifndef cpu_pause
+    #define cpu_pause() do { } while(0)
+#endif
 
 typedef struct {
     volatile int count;
@@ -40,7 +42,7 @@ static inline void semavore_signal(semavore_t *sem) {
 }
 
 static inline int semavore_getvalue(semavore_t *sem) {
-    __atomic_load_n(&sem->count, __ATOMIC_ACQUIRE);
+    return __atomic_load_n(&sem->count, __ATOMIC_ACQUIRE);
 }
 
 #endif // SEMAVORE_H
