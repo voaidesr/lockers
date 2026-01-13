@@ -9,10 +9,6 @@
 
 #define NUM_THREADS 4
 #define ITERATIONS 100000
-#define SEM_BUFFER_SIZE 10
-#define SEM_PRODUCERS 2
-#define SEM_CONSUMERS 2
-#define SEM_ITEMS_PER_THREAD 20
 
 // Mutex
 int mutex_shared_counter = 0;
@@ -110,6 +106,11 @@ void test_rwlock(void) {
 }
 
 // Semaphore
+#define SEM_BUFFER_SIZE 10
+#define SEM_PRODUCERS 2
+#define SEM_CONSUMERS 2
+#define SEM_ITEMS_PER_THREAD 20
+
 typedef struct {
     int id;
     int is_producer;
